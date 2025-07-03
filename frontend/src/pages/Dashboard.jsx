@@ -8,7 +8,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-const API= "https://devconnect-2-l0gv.onrender.com"; // ⬅️ update this
+const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
 
 
 
