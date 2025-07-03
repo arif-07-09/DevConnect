@@ -8,7 +8,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  const API = process.env.REACT_APP_API_URL;
+const API= "https://your-backend-url.onrender.com"; // ⬅️ update this
 
 
 
