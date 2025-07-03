@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const API = "https://your-backend-url.onrender.com"; // ⬅️ update this
+  const API = "https://devconnect-2-l0gv.onrender.com"; // ⬅️ update this
 
   const [likes, setLikes] = useState({});
   const [showMenu, setShowMenu] = useState(false);
