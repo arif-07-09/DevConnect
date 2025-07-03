@@ -8,11 +8,13 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  
+  const [myId, setMyId] = useState(null);
   const [likes, setLikes] = useState({});
   const [followStatus, setFollowStatus] = useState("");
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
-  const API_BASE = "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     if (!token) {
