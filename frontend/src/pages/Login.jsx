@@ -8,7 +8,8 @@ const Login = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-
+  
+  const API_BASE = process.env.REACT_APP_API_URL; // Adjust if needed
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -18,7 +19,7 @@ const Login = () => {
     setError('');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/login', form);
+      const res = await axios.post('{API_BASE}/api/login', form);
       localStorage.setItem('token', res.data.token);
       navigate('/profile');
     } catch (err) {
