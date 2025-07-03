@@ -9,8 +9,8 @@ const Register = () => {
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  
-  const API = process.env.REACT_APP_API_URL;
+  const API_BASE = "https://your-backend-url.onrender.com"; // ⬅️ update this
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
