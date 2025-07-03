@@ -5,7 +5,8 @@ const FollowRequests = () => {
   const [requests, setRequests] = useState([]);
   const [message, setMessage] = useState("");
   const token = localStorage.getItem("token");
-  const API_BASE = process.env.REACT_APP_API_URL;
+  const API_BASE = "https://your-backend-url.onrender.com"; // ⬅️ update this
+
 
   const fetchRequests = useCallback(async () => {
     try {
