@@ -11,7 +11,7 @@ const Posts = () => {
   const [openDropdownId, setOpenDropdownId] = useState(null); // for controlled dropdown
 
   const token = localStorage.getItem('token');
-const API_BASE = "https://devconnect-2-l0gv.onrender.com"; // ⬅️ update this
+const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
 
   const decodedToken = token ? jwtDecode(token) : null;
   const currentUserId = decodedToken?.id;
