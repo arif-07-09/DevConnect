@@ -19,7 +19,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // ✅ ser
 }));
 app.use(express.json());           // Parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Parse form data
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ Route Registration
 app.use("/api", authRoutes);
