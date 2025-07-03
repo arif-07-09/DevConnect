@@ -12,11 +12,12 @@ const postRoutes = require('./routes/post');
 const notificationRoutes = require('./routes/notifications');
 
 const app = express();
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // ✅ serve images
-// ✅ Middlewareapp.use(cors({
-  origin: "https://dev-connect-sage.vercel.app", // allow your frontend
-  credentials: true // only if using cookies or sessions
+// ✅ Middleware
+app.use(cors({
+  origin: "https://dev-connect-sage.vercel.app",
+  credentials: true
 }));
+
 app.use(express.json());           // Parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Parse form data
 
