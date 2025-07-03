@@ -8,7 +8,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-const API= "https://your-backend-url.onrender.com"; // ⬅️ update this
+const API= "https://devconnect-2-l0gv.onrender.com"; // ⬅️ update this
 
 
 
