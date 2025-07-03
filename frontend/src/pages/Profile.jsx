@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const API = process.env.REACT_APP_API_URL;
+  const API_BASE = "https://your-backend-url.onrender.com"; // ⬅️ update this
+
   const [likes, setLikes] = useState({});
   const [showMenu, setShowMenu] = useState(false);
   const [openDropdownPostId, setOpenDropdownPostId] = useState(null);
