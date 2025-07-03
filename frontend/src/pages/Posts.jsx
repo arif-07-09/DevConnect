@@ -11,7 +11,7 @@ const Posts = () => {
   const [openDropdownId, setOpenDropdownId] = useState(null); // for controlled dropdown
 
   const token = localStorage.getItem('token');
-  const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE = "https://your-backend-url.onrender.com"; // ⬅️ update this
 
   const decodedToken = token ? jwtDecode(token) : null;
   const currentUserId = decodedToken?.id;
