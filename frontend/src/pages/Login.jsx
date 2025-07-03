@@ -9,7 +9,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   
-  const API_BASE = process.env.REACT_APP_API_URL; // Adjust if needed
+  const API_BASE = "https://your-backend-url.onrender.com"; // ⬅️ update this
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
