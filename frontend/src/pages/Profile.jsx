@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const API = 'http://localhost:5000';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const API = process.env.REACT_APP_API_URL;
   const [likes, setLikes] = useState({});
   const [showMenu, setShowMenu] = useState(false);
   const [openDropdownPostId, setOpenDropdownPostId] = useState(null);
