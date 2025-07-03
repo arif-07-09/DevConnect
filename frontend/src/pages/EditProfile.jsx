@@ -11,7 +11,9 @@ const EditProfile = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const API_BASE = process.env.REACT_APP_API_URL; // Adjust if needed
+  
+  const API_BASE = "https://your-backend-url.onrender.com"; // ⬅️ update this
+
  // Adjust if needed
 
   useEffect(() => {
