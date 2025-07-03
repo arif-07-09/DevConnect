@@ -14,7 +14,8 @@ const UserProfile = () => {
   const [followStatus, setFollowStatus] = useState("");
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
-  const API_BASE = process.env.REACT_APP_API_URL;
+  const API_BASE = "https://your-backend-url.onrender.com"; // ⬅️ update this
+
 
   useEffect(() => {
     if (!token) {
