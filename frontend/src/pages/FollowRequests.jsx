@@ -5,7 +5,7 @@ const FollowRequests = () => {
   const [requests, setRequests] = useState([]);
   const [message, setMessage] = useState("");
   const token = localStorage.getItem("token");
-  const API_BASE = "https://devconnect-2-l0gv.onrender.com"; // ⬅️ update this
+  const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
 
 
   const fetchRequests = useCallback(async () => {
