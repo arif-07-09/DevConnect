@@ -14,7 +14,7 @@ const notificationRoutes = require('./routes/notifications');
 const app = express();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // ✅ serve images
 // ✅ Middlewareapp.use(cors({
-  origin: "https://devconnect-frontend-ekwg.vercel.app", // allow your frontend
+  origin: "https://dev-connect-sage.vercel.app", // allow your frontend
   credentials: true // only if using cookies or sessions
 }));
 app.use(express.json());           // Parse JSON requests
