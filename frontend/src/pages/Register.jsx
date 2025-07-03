@@ -9,7 +9,7 @@ const Register = () => {
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const API = "https://devconnect-2-l0gv.onrender.com"; // ⬅️ update this
+  const API = process.env.REACT_APP_API_BASE; // ⬅️ update this
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
