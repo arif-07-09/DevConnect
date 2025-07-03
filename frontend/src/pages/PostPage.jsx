@@ -7,7 +7,7 @@ const PostPage = () => {
   const [post, setPost] = useState(null);
   const [error, setError] = useState('');
   const token = localStorage.getItem('token');
-const API= "https://devconnect-2-l0gv.onrender.com"; // ⬅️ update this
+const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
 
   useEffect(() => {
     if (!token) return;
