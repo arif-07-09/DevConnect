@@ -7,7 +7,7 @@ const Users = () => {
   const [myId, setMyId] = useState(null);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
-  const API_BASE = "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     if (!token) return;
