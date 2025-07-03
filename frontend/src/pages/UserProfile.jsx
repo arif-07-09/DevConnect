@@ -14,7 +14,7 @@ const UserProfile = () => {
   const [followStatus, setFollowStatus] = useState("");
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
-  const API_BASE = "https://devconnect-2-l0gv.onrender.com"; // ⬅️ update this
+  const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
 
 
   useEffect(() => {
