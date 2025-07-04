@@ -8,9 +8,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
-
-
+  const API = process.env.REACT_APP_API_BASE; // ⬅️ ensure it's set in .env
 
   useEffect(() => {
     if (!token) return navigate('/login');
@@ -26,21 +24,22 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
       return navigate('/login');
     }
 
-    axios.get(`${API}/api/dashboard`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => {
+    axios
+      .get(`${API}/api/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
         setData(res.data);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         navigate('/login');
       });
-  }, [navigate, token]);
+  }, [navigate, token, API]);
 
   const handleNotifClick = (notif) => {
-    if ((notif.type === 'follow_request' || notif.type === 'follow_accepted')) {
+    if (notif.type === 'follow_request' || notif.type === 'follow_accepted') {
       navigate('/follow-requests');
     } else if (notif.type === 'like' && notif.postId) {
       navigate(`/post/${notif.postId}`);
@@ -53,20 +52,25 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setData(prev => ({
+      setData((prev) => ({
         ...prev,
         notifications: [],
         stats: {
           ...prev.stats,
-          notifications: 0
-        }
+          notifications: 0,
+        },
       }));
     } catch (err) {
-      console.error("Failed to clear notifications", err);
+      console.error('Failed to clear notifications', err);
     }
   };
 
-  if (loading) return <div className="container mt-5"><p>Loading...</p></div>;
+  if (loading)
+    return (
+      <div className="container mt-5">
+        <p>Loading...</p>
+      </div>
+    );
 
   return (
     <div className="container mt-5">
@@ -83,12 +87,12 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
         </div>
 
         <div className="col-md-4">
-          <div className="card text-center border-success">
-            <div
-              className="card-body"
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/follow-requests')}
-            >
+          <div
+            className="card text-center border-success"
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate('/follow-requests')}
+          >
+            <div className="card-body">
               <h5 className="card-title">Follow Requests</h5>
               <p className="card-text display-6">
                 {data.stats.followRequests}
@@ -109,10 +113,9 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
         </div>
       </div>
 
-      {/* Notification Header with Clear Button */}
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h3 className="mb-0">Recent Notifications</h3>
-        {data.notifications.length > 0 && (
+        {data.notifications?.length > 0 && (
           <button
             className="btn btn-sm btn-outline-danger"
             onClick={handleClearNotifications}
@@ -122,11 +125,11 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
         )}
       </div>
 
-      {(!data.notifications || data.notifications.length === 0) ? (
+      {!data.notifications || data.notifications.length === 0 ? (
         <p>No notifications</p>
       ) : (
         <ul className="list-group">
-          {data.notifications.map(notif => (
+          {data.notifications.map((notif) => (
             <li
               key={notif._id}
               className="list-group-item list-group-item-action"
@@ -134,16 +137,14 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
               style={{ cursor: 'pointer' }}
             >
               {notif.type === 'like' && notif.fromUser?.name &&
-                `🖤 Your post was liked by @${notif.fromUser.name}`
-              }
+                `🖤 Your post was liked by @${notif.fromUser.name}`}
               {(notif.type === 'follow_request' || notif.type === 'follow_accepted') && notif.fromUser?.name &&
-                `🤝 @${notif.fromUser.name} ${notif.type === 'follow_request' ? 'sent you a follow request' : 'accepted your request'}`
-              }
-              {!notif.fromUser?.name &&
-                `🔔 New notification`
-              }
+                `🤝 @${notif.fromUser.name} ${notif.type === 'follow_request' ? 'sent you a follow request' : 'accepted your request'}`}
+              {!notif.fromUser?.name && `🔔 New notification`}
               <small className="text-muted d-block">
-                {notif.createdAt ? new Date(notif.createdAt).toLocaleString() : ''}
+                {notif.createdAt
+                  ? new Date(notif.createdAt).toLocaleString()
+                  : ''}
               </small>
             </li>
           ))}
