@@ -14,7 +14,7 @@ const notificationRoutes = require('./routes/notifications');
 const app = express();
 // ✅ Middleware
 app.use(cors({
-  origin: "https://dev-connect-omega-one.vercel.app/",
+  origin: "https://dev-connect-3l5g.vercel.app/",
   credentials: true
 }));
 
