@@ -3,17 +3,16 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const API = process.env.REACT_APP_API_BASE; // ⬅️ update this
-
   const [likes, setLikes] = useState({});
   const [showMenu, setShowMenu] = useState(false);
   const [openDropdownPostId, setOpenDropdownPostId] = useState(null);
+
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
+  const API = process.env.REACT_APP_API_BASE;
 
   useEffect(() => {
     if (!token) {
@@ -33,10 +32,7 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const userPosts = postRes.data.filter(
-          (post) => post.author._id === currentUser._id
-        );
-
+        const userPosts = postRes.data.filter(post => post.author._id === currentUser._id);
         setPosts(userPosts);
 
         const likeMap = {};
@@ -51,7 +47,7 @@ const Profile = () => {
     };
 
     fetchUserAndPosts();
-  }, [navigate, token]);
+  }, [navigate, token, API]);
 
   const toggleLike = async (postId) => {
     try {
