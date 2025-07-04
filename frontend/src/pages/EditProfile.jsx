@@ -4,17 +4,20 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const EditProfile = () => {
-  const [form, setForm] = useState({ name: "", email: "", oldPassword: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    oldPassword: "",
+    password: "",
+  });
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [userProfilePic, setUserProfilePic] = useState(""); // to display existing profile picture
+  const [userProfilePic, setUserProfilePic] = useState("");
   const [message, setMessage] = useState("");
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  
-  const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
-
- // Adjust if needed
+  const API_BASE = process.env.REACT_APP_API_BASE;
 
   useEffect(() => {
     if (!token) {
@@ -27,18 +30,28 @@ const EditProfile = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        const { name, email, profilePic } = res.data.user;
-        setForm((prev) => ({ ...prev, name: name || "", email: email || "" }));
+        const { name, email, profilePic } = res.data.user || {};
+        setForm((prev) => ({
+          ...prev,
+          name: name || "",
+          email: email || "",
+        }));
 
         if (profilePic) {
           setUserProfilePic(`${API_BASE}/uploads/${profilePic}`);
         }
       })
-      .catch(() => navigate("/login"));
-  }, [navigate, token]);
+      .catch(() => {
+        localStorage.removeItem("token");
+        navigate("/login");
+      });
+  }, [navigate, token, API_BASE]);
 
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handlePhotoChange = (e) => {
@@ -69,12 +82,16 @@ const EditProfile = () => {
       });
 
       setMessage(res.data.msg || "Profile updated successfully");
-      setForm((prev) => ({ ...prev, oldPassword: "", password: "" }));
+      setForm((prev) => ({
+        ...prev,
+        oldPassword: "",
+        password: "",
+      }));
 
-      // Refresh the userProfilePic after successful save
       if (res.data.user?.profilePic) {
         setUserProfilePic(`${API_BASE}/uploads/${res.data.user.profilePic}`);
       }
+
       setPhoto(null);
       setPhotoPreview(null);
     } catch (err) {
@@ -96,6 +113,7 @@ const EditProfile = () => {
           />
         </div>
       )}
+
       {photoPreview && (
         <div className="mb-3">
           <img
