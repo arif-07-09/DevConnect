@@ -8,10 +8,10 @@ const Posts = () => {
   const [newPost, setNewPost] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState('');
-  const [openDropdownId, setOpenDropdownId] = useState(null); // for controlled dropdown
+  const [openDropdownId, setOpenDropdownId] = useState(null);
 
   const token = localStorage.getItem('token');
-const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
+  const API_BASE = process.env.REACT_APP_API_BASE;
 
   const decodedToken = token ? jwtDecode(token) : null;
   const currentUserId = decodedToken?.id;
@@ -25,13 +25,12 @@ const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
     } catch {
       setMessage('Failed to load posts');
     }
-  }, [token]);
+  }, [token, API_BASE]);
 
   useEffect(() => {
     if (token) fetchPosts();
   }, [token, fetchPosts]);
 
-  // Automatically clear message after 10 seconds
   useEffect(() => {
     if (message) {
       const timeout = setTimeout(() => setMessage(''), 10000);
@@ -65,15 +64,18 @@ const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
 
   const handleToggleLike = async (postId, likedByUser) => {
     try {
-      if (likedByUser) {
-        await axios.delete(`${API_BASE}/api/posts/${postId}/unlike`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      } else {
-        await axios.post(`${API_BASE}/api/posts/${postId}/like`, {}, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+      const url = likedByUser
+        ? `${API_BASE}/api/posts/${postId}/unlike`
+        : `${API_BASE}/api/posts/${postId}/like`;
+
+      const method = likedByUser ? axios.delete : axios.post;
+
+      await method(url, likedByUser ? {
+        headers: { Authorization: `Bearer ${token}` }
+      } : {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
       fetchPosts();
     } catch (err) {
       setMessage(err.response?.data?.msg || 'Failed to toggle like');
@@ -189,7 +191,7 @@ const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
             <p className="card-text">{post.content}</p>
             {post.image && (
               <img
-                src={`http://localhost:5000/uploads/${post.image}`}
+                src={`${API_BASE}/uploads/${post.image}`}
                 alt="Post"
                 className="img-fluid rounded mb-2"
               />
