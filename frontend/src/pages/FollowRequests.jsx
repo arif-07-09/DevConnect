@@ -5,33 +5,36 @@ const FollowRequests = () => {
   const [requests, setRequests] = useState([]);
   const [message, setMessage] = useState("");
   const token = localStorage.getItem("token");
-  const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
+  const API_BASE = process.env.REACT_APP_API_BASE;
 
+  const clearMessageAfterDelay = () => {
+    setTimeout(() => {
+      setMessage("");
+    }, 5000);
+  };
 
   const fetchRequests = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE}/api/follow/requests`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setRequests(res.data);
+      setRequests(res.data || []);
     } catch (err) {
       console.error("Failed to fetch follow requests", err);
       setMessage("Failed to load follow requests.");
       clearMessageAfterDelay();
     }
-  }, [token]);
-
-  const clearMessageAfterDelay = () => {
-    setTimeout(() => {
-      setMessage("");
-    }, 5000); // 5 seconds
-  };
+  }, [token, API_BASE]);
 
   const handleAccept = async (requesterId) => {
     try {
-      await axios.put(`${API_BASE}/api/follow/accept/${requesterId}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.put(
+        `${API_BASE}/api/follow/accept/${requesterId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setMessage("✅ Follow request accepted.");
       fetchRequests();
     } catch (err) {
@@ -94,7 +97,8 @@ const FollowRequests = () => {
                   }}
                 />
                 <span>
-                  {req.follower?.name} ({req.follower?.email})
+                  {req.follower?.name || "Unknown User"} (
+                  {req.follower?.email || "No email"})
                 </span>
               </div>
               <div>
