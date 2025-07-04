@@ -7,7 +7,8 @@ const PostPage = () => {
   const [post, setPost] = useState(null);
   const [error, setError] = useState('');
   const token = localStorage.getItem('token');
-const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
+
+  const API = process.env.REACT_APP_API_BASE; // ✅ Base URL from environment
 
   useEffect(() => {
     if (!token) return;
@@ -15,12 +16,12 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
     axios.get(`${API}/api/posts/${postId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-    .then(res => setPost(res.data))
-    .catch(err => {
-      console.error(err);
-      setError('Failed to load post.');
-    });
-  }, [postId, token]);
+      .then((res) => setPost(res.data))
+      .catch((err) => {
+        console.error(err);
+        setError('Failed to load post.');
+      });
+  }, [postId, token, API]);
 
   if (error) return <div className="container mt-5"><p>{error}</p></div>;
   if (!post) return <div className="container mt-5"><p>Loading...</p></div>;
@@ -39,13 +40,15 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
                   height: '40px',
                   borderRadius: '50%',
                   objectFit: 'cover',
-                  marginRight: '10px'
+                  marginRight: '10px',
                 }}
               />
             </Link>
             <h5 className="mb-0">{post.author.name}</h5>
           </div>
+
           <p>{post.content}</p>
+
           {post.image && (
             <img
               src={`${API}/uploads/${post.image}`}
@@ -53,7 +56,11 @@ const API= process.env.REACT_APP_API_BASE; // ⬅️ update this
               className="img-fluid rounded mb-2"
             />
           )}
-          <small className="text-muted d-block">{new Date(post.createdAt).toLocaleString()}</small>
+
+          <small className="text-muted d-block">
+            {new Date(post.createdAt).toLocaleString()}
+          </small>
+
           <div className="mt-2">
             <strong>{post.likeCount} likes</strong>
           </div>
