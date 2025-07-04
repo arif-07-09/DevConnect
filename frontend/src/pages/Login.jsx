@@ -9,7 +9,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   
-  const API_BASE = process.env.REACT_APP_API_BASE; // ⬅️ update this
+  const API_BASE = process.env.REACT_APP_API_BASE;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -20,7 +20,7 @@ const Login = () => {
     setError('');
 
     try {
-      const res = await axios.post('{API_BASE}/api/login', form);
+      const res = await axios.post(`${API_BASE}/api/login`, form);
       localStorage.setItem('token', res.data.token);
       navigate('/profile');
     } catch (err) {
@@ -33,6 +33,7 @@ const Login = () => {
     <div className="container mt-5" style={{ maxWidth: '400px' }}>
       <h2>Login</h2>
       {error && <div className="alert alert-danger">{error}</div>}
+      
       <form onSubmit={handleSubmit}>
         <input
           className="form-control mb-2"
@@ -43,6 +44,7 @@ const Login = () => {
           onChange={handleChange}
           required
         />
+
         <div className="input-group mb-2">
           <input
             className="form-control"
@@ -62,6 +64,7 @@ const Login = () => {
             {showPassword ? '🙈' : '👁️'}
           </button>
         </div>
+
         <button className="btn btn-success w-100">Login</button>
       </form>
     </div>
