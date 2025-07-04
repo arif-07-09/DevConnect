@@ -4,12 +4,18 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
-  const [form, setForm] = useState({ name: '', email: '', password: '', about: 'job_seeker' });
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    about: 'job_seeker',
+  });
   const [profilePic, setProfilePic] = useState(null);
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const API = process.env.REACT_APP_API_BASE; // ⬅️ update this
+
+  const API = process.env.REACT_APP_API_BASE;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,11 +39,13 @@ const Register = () => {
         formData.append('profilePic', profilePic);
       }
 
-      await axios.post('{API}/api/register', formData, {
+      // ✅ Corrected API URL interpolation
+      await axios.post(`${API}/api/register`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      const loginRes = await axios.post('{API}/api/login', {
+      // ✅ Corrected login request
+      const loginRes = await axios.post(`${API}/api/login`, {
         email: form.email,
         password: form.password,
       });
