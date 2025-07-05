@@ -15,22 +15,21 @@ const Profile = () => {
   const API = process.env.REACT_APP_API_BASE;
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!token) return navigate('/login');
 
-    const fetchUserAndPosts = async () => {
+    const fetchData = async () => {
       try {
-        const userRes = await axios.get(`${API}/api/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const [userRes, postRes] = await Promise.all([
+          axios.get(`${API}/api/profile`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${API}/api/posts`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
         const currentUser = userRes.data.user;
         setUser(currentUser);
-
-        const postRes = await axios.get(`${API}/api/posts`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
 
         const userPosts = postRes.data.filter(post => post.author._id === currentUser._id);
         setPosts(userPosts);
@@ -46,7 +45,7 @@ const Profile = () => {
       }
     };
 
-    fetchUserAndPosts();
+    fetchData();
   }, [navigate, token, API]);
 
   const toggleLike = async (postId) => {
@@ -56,20 +55,20 @@ const Profile = () => {
       });
 
       setLikes(prev => ({ ...prev, [postId]: !prev[postId] }));
-
-      const res = await axios.get(`${API}/api/posts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const updated = res.data.filter(post => post.author._id === user._id);
-      setPosts(updated);
+      setPosts(prev =>
+        prev.map(post =>
+          post._id === postId
+            ? { ...post, likeCount: post.likeCount + (likes[postId] ? -1 : 1) }
+            : post
+        )
+      );
     } catch (err) {
       console.error("Error toggling like", err);
     }
   };
 
   const deletePost = async (postId) => {
-    const confirm = window.confirm("Are you sure you want to delete this post?");
-    if (!confirm) return;
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
 
     try {
       await axios.delete(`${API}/api/posts/${postId}`, {
@@ -87,8 +86,7 @@ const Profile = () => {
   };
 
   const handleDeleteAccount = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete your account? This action is irreversible.");
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete your account? This action is irreversible.")) return;
 
     try {
       await axios.delete(`${API}/api/delete-account`, {
@@ -120,23 +118,15 @@ const Profile = () => {
             </button>
             {showMenu && (
               <ul className="dropdown-menu show" style={{ position: 'absolute' }}>
-                <li>
-                  <button className="dropdown-item" onClick={handleLogout}>
-                    🔓 Logout
-                  </button>
-                </li>
-                <li>
-                  <button className="dropdown-item text-danger" onClick={handleDeleteAccount}>
-                    🗑️ Delete Account
-                  </button>
-                </li>
+                <li><button className="dropdown-item" onClick={handleLogout}>🔓 Logout</button></li>
+                <li><button className="dropdown-item text-danger" onClick={handleDeleteAccount}>🗑️ Delete Account</button></li>
               </ul>
             )}
           </div>
         </div>
 
         {user ? (
-          <div className="card p-4 shadow-sm">
+          <div className="card p-4 shadow-sm text-center">
             <img
               src={`${API}/uploads/${user.profilePic || 'default-user.png'}`}
               alt={user.name}
@@ -162,7 +152,7 @@ const Profile = () => {
       ) : (
         <div className="mb-5 d-flex flex-column align-items-center">
           {posts.map(post => (
-            <div className="card mb-4 shadow-sm" key={post._id} style={{ maxWidth: '600px', width: '100%' }}>
+            <div key={post._id} className="card mb-4 shadow-sm" style={{ maxWidth: '600px', width: '100%' }}>
               <div className="card-header d-flex justify-content-between align-items-center">
                 <div className="d-flex align-items-center">
                   <img
