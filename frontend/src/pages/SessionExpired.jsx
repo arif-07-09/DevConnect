@@ -4,11 +4,13 @@ import { Link } from 'react-router-dom';
 
 const SessionExpired = () => {
   return (
-    <div className="container mt-5 text-center">
-      <h2 className="text-danger">Session Expired</h2>
-      <p>Please login again to continue.</p>
-      <Link className="btn btn-primary" to="/login">Go to Login</Link>
-    </div>
+    <main className="container mt-5 text-center">
+      <div role="alert">
+        <h2 className="text-danger mb-3">Session Expired</h2>
+        <p className="mb-4">Please login again to continue.</p>
+        <Link className="btn btn-primary" to="/login">Go to Login</Link>
+      </div>
+    </main>
   );
 };
 
