@@ -96,22 +96,27 @@ const Navbar = () => {
                 <Link className="nav-link" to="/posts">Posts</Link>
               </li>
 
-              {/* React-controlled Jobs Dropdown (no Bootstrap JS required) */}
+              {/* Jobs Dropdown - Pure React */}
               <li className="nav-item" ref={jobsRef} style={{ position: 'relative' }}>
                 <button
-                  className="nav-link dropdown-toggle btn btn-link"
-                  id="jobsDropdown"
-                  aria-expanded={openJobsMenu}
+                  type="button"
+                  className="nav-link btn btn-link"
                   onClick={() => setOpenJobsMenu(prev => !prev)}
+                  style={{ textDecoration: 'none' }}
                 >
-                  Jobs
+                  Jobs ▾
                 </button>
 
                 {openJobsMenu && (
                   <ul
                     className="dropdown-menu show"
-                    aria-labelledby="jobsDropdown"
-                    style={{ position: 'absolute', left: 0, marginTop: '6px', zIndex: 1000 }}
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      zIndex: 1000,
+                      display: 'block'
+                    }}
                   >
                     {userType === 'hiring' && (
                       <li>
@@ -143,7 +148,9 @@ const Navbar = () => {
         </ul>
 
         {isAuthenticated && (
-          <button className="btn btn-outline-danger" onClick={handleLogout}>Logout</button>
+          <button className="btn btn-outline-danger" onClick={handleLogout}>
+            Logout
+          </button>
         )}
       </div>
     </nav>
