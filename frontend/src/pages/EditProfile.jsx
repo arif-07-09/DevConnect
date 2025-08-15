@@ -1,17 +1,26 @@
-// src/pages/EditProfile.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const EditProfile = () => {
-  const [form, setForm] = useState({ name: "", email: "", oldPassword: "", password: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    oldPassword: "",
+    password: "",
+    about: "job_seeker",
+  });
+
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [userProfilePic, setUserProfilePic] = useState(""); // to display existing profile picture
+  const [userProfilePic, setUserProfilePic] = useState("");
   const [message, setMessage] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const API_BASE = "http://localhost:5000"; // Adjust if needed
+  const API_BASE = process.env.REACT_APP_API_BASE;
 
   useEffect(() => {
     if (!token) {
@@ -24,8 +33,13 @@ const EditProfile = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        const { name, email, profilePic } = res.data.user;
-        setForm((prev) => ({ ...prev, name: name || "", email: email || "" }));
+        const { name, email, profilePic, about } = res.data.user;
+        setForm((prev) => ({
+          ...prev,
+          name: name || "",
+          email: email || "",
+          about: about || "job_seeker",
+        }));
 
         if (profilePic) {
           setUserProfilePic(`${API_BASE}/uploads/${profilePic}`);
@@ -55,6 +69,7 @@ const EditProfile = () => {
       const formData = new FormData();
       formData.append("name", form.name);
       formData.append("email", form.email);
+      formData.append("about", form.about);
       if (form.oldPassword) formData.append("oldPassword", form.oldPassword);
       if (form.password) formData.append("password", form.password);
       if (photo) formData.append("photo", photo);
@@ -68,7 +83,6 @@ const EditProfile = () => {
       setMessage(res.data.msg || "Profile updated successfully");
       setForm((prev) => ({ ...prev, oldPassword: "", password: "" }));
 
-      // Refresh the userProfilePic after successful save
       if (res.data.user?.profilePic) {
         setUserProfilePic(`${API_BASE}/uploads/${res.data.user.profilePic}`);
       }
@@ -122,22 +136,58 @@ const EditProfile = () => {
           placeholder="Email"
           required
         />
-        <input
-          className="form-control mb-2"
-          type="password"
-          name="oldPassword"
-          value={form.oldPassword}
+
+        <div className="mb-2">
+          <div className="input-group">
+            <input
+              type={showOldPassword ? "text" : "password"}
+              className="form-control"
+              name="oldPassword"
+              value={form.oldPassword}
+              onChange={handleChange}
+              placeholder="Current Password (required to change password)"
+            />
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => setShowOldPassword((prev) => !prev)}
+              tabIndex={-1}
+            >
+              {showOldPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+        </div>
+
+        <div className="mb-2">
+          <div className="input-group">
+            <input
+              type={showNewPassword ? "text" : "password"}
+              className="form-control"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="New Password"
+            />
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => setShowNewPassword((prev) => !prev)}
+              tabIndex={-1}
+            >
+              {showNewPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+        </div>
+
+        <select
+          className="form-control mb-3"
+          name="about"
+          value={form.about}
           onChange={handleChange}
-          placeholder="Current Password"
-        />
-        <input
-          className="form-control mb-2"
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="New Password (optional)"
-        />
+        >
+          <option value="job_seeker">Looking for a Job</option>
+          <option value="hiring">Hiring</option>
+        </select>
         <input
           className="form-control mb-3"
           type="file"
@@ -151,3 +201,4 @@ const EditProfile = () => {
 };
 
 export default EditProfile;
+ 

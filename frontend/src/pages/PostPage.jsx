@@ -7,7 +7,7 @@ const PostPage = () => {
   const [post, setPost] = useState(null);
   const [error, setError] = useState('');
   const token = localStorage.getItem('token');
-  const API = 'http://localhost:5000';
+  const API = process.env.REACT_APP_API_BASE;
 
   useEffect(() => {
     if (!token) return;
@@ -30,7 +30,7 @@ const PostPage = () => {
       <div className="card">
         <div className="card-body">
           <div className="d-flex align-items-center mb-3">
-            <Link to={`/user/${post.author._id}`}>
+            <Link to={`${API}/user/${post.author._id}`}>
               <img
                 src={`${API}/uploads/${post.author.profilePic || 'default-user.png'}`}
                 alt="profile"

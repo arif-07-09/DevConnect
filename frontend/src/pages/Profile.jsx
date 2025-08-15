@@ -1,14 +1,15 @@
 // src/pages/Profile.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
-const API = 'http://localhost:5000';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [likes, setLikes] = useState({});
+  const API = process.env.REACT_APP_API_BASE;
+
   const [showMenu, setShowMenu] = useState(false);
   const [openDropdownPostId, setOpenDropdownPostId] = useState(null);
   const navigate = useNavigate();
@@ -52,19 +53,29 @@ const Profile = () => {
     fetchUserAndPosts();
   }, [navigate, token]);
 
-  const toggleLike = async (postId) => {
+  const toggleLike = async (postId, likedByUser) => {
     try {
-      await axios.post(`${API}/api/posts/${postId}/like`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setLikes(prev => ({ ...prev, [postId]: !prev[postId] }));
+      if (likedByUser) {
+        await axios.delete(`${API}/api/posts/${postId}/unlike`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        await axios.post(`${API}/api/posts/${postId}/like`, {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
 
       const res = await axios.get(`${API}/api/posts`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const updated = res.data.filter(post => post.author._id === user._id);
       setPosts(updated);
+
+      const likeMap = {};
+      updated.forEach(post => {
+        likeMap[post._id] = post.likedByUser;
+      });
+      setLikes(likeMap);
     } catch (err) {
       console.error("Error toggling like", err);
     }
@@ -149,6 +160,7 @@ const Profile = () => {
               style={{ objectFit: 'cover' }}
             />
             <p><strong>Name:</strong> {user.name}</p>
+            <p><strong>About:</strong> {user.about === 'hiring' ? 'Hiring' : 'Looking for a Job'}</p>
             <p><strong>Email:</strong> {user.email}</p>
           </div>
         ) : (
@@ -166,56 +178,68 @@ const Profile = () => {
         <div className="mb-5 d-flex flex-column align-items-center">
           {posts.map(post => (
             <div className="card mb-4 shadow-sm" key={post._id} style={{ maxWidth: '600px', width: '100%' }}>
-              <div className="card-header d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                  <img
-                    src={`${API}/uploads/${user.profilePic || 'default-user.png'}`}
-                    alt={user.name}
-                    width="40"
-                    height="40"
-                    className="rounded-circle me-2"
-                  />
-                  <strong>{user.name}</strong>
-                </div>
-                <div className="dropdown">
-                  <button
-                    className="btn btn-sm btn-light"
-                    onClick={() => toggleDropdown(post._id)}
-                  >
-                    ⋮
-                  </button>
-                  {openDropdownPostId === post._id && (
-                    <ul className="dropdown-menu show dropdown-menu-end" style={{ position: 'absolute' }}>
-                      <li>
-                        <button className="dropdown-item text-danger" onClick={() => deletePost(post._id)}>
-                          🗑️ Delete Post
-                        </button>
-                      </li>
-                    </ul>
-                  )}
-                </div>
-              </div>
-
               <div className="card-body">
-                <p>{post.content}</p>
+                <div className="d-flex justify-content-between align-items-start mb-2">
+                  <div className="d-flex align-items-center">
+                    <Link to="/profile">
+                      <img
+                        src={`${API}/uploads/${user.profilePic || 'default-user.png'}`}
+                        alt="profile"
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          marginRight: '10px'
+                        }}
+                      />
+                    </Link>
+                    <h5 className="card-title mb-0">{user.name}</h5>
+                  </div>
+                  <div className="position-relative">
+                    <button
+                      className="btn btn-sm btn-light"
+                      onClick={() => toggleDropdown(post._id)}
+                    >
+                      ⋮
+                    </button>
+                    {openDropdownPostId === post._id && (
+                      <ul className="dropdown-menu show position-absolute end-0" style={{ zIndex: 1000 }}>
+                        <li>
+                          <button
+                            className="dropdown-item text-danger"
+                            onClick={() => deletePost(post._id)}
+                          >
+                            🗑️ Delete Post
+                          </button>
+                        </li>
+                      </ul>
+                    )}
+                  </div>
+                </div>
+
+                <p className="card-text">{post.content}</p>
                 {post.image && (
                   <img
                     src={`${API}/uploads/${post.image}`}
                     alt="Post"
-                    className="img-fluid rounded"
-                    style={{ maxHeight: '300px', objectFit: 'cover' }}
+                    className="img-fluid rounded mb-2"
                   />
                 )}
-              </div>
 
-              <div className="card-footer d-flex justify-content-between align-items-center">
-                <button
-                  className={`btn btn-sm ${likes[post._id] ? 'btn-danger' : 'btn-outline-danger'}`}
-                  onClick={() => toggleLike(post._id)}
-                >
-                  ❤️ {post.likeCount}
-                </button>
-                <small className="text-muted">{new Date(post.createdAt).toLocaleString()}</small>
+                <small className="text-muted">
+                  {new Date(post.createdAt).toLocaleString()}
+                </small>
+
+                <div className="d-flex justify-content-between align-items-center mt-2">
+                  <button
+                    className={`btn btn-sm ${likes[post._id] ? 'btn-outline-danger' : 'btn-outline-primary'}`}
+                    onClick={() => toggleLike(post._id, likes[post._id])}
+                  >
+                    {likes[post._id] ? '👎 Unlike' : '👍 Like'}
+                  </button>
+                  <span>{post.likeCount || 0} likes</span>
+                </div>
               </div>
             </div>
           ))}

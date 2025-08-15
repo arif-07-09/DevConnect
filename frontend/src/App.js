@@ -18,7 +18,9 @@ import FollowRequests from "./pages/FollowRequests"; // adjust path if needed
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // ⬅️ This line is critical
 import PostPage from './pages/PostPage';
-
+import PostJob from './pages/PostJob';
+import Jobs from './pages/Jobs';
+import JobApplicants from './pages/JobApplicants';
 
 
 const App = () => {
@@ -46,6 +48,10 @@ const App = () => {
           }
         />
         <Route path="/session-expired" element={<SessionExpired />} />
+        {/* Job routes */}
+        <Route path="/post-job" element={<PostJob />} />
+        <Route path="/jobs" element={<Jobs />} />
+        <Route path="/jobs/:jobId/applicants" element={<JobApplicants />} />
       </Routes>
     </Router>
   );

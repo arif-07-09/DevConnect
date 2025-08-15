@@ -1,4 +1,3 @@
-// src/pages/UserProfile.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
@@ -10,9 +9,10 @@ const UserProfile = () => {
   const [posts, setPosts] = useState([]);
   const [likes, setLikes] = useState({});
   const [followStatus, setFollowStatus] = useState("");
+  const [myId, setMyId] = useState(null);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
-  const API_BASE = "http://localhost:5000";
+  const API_BASE = process.env.REACT_APP_API_BASE;
 
   useEffect(() => {
     if (!token) {
@@ -22,13 +22,12 @@ const UserProfile = () => {
 
     const fetchData = async () => {
       try {
-        // Get own profile to know my ID
         const profileRes = await axios.get(`${API_BASE}/api/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setMyId(profileRes.data.user._id);
+        const myUser = profileRes.data.user;
+        setMyId(myUser._id);
 
-        // Get the other user's profile and their posts
         const [userRes, postsRes] = await Promise.all([
           axios.get(`${API_BASE}/api/user/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -48,20 +47,22 @@ const UserProfile = () => {
         });
         setLikes(likeMap);
 
-        // Determine follow status between me and that user
-        const followRes = await axios.get(`${API_BASE}/api/users`, {
+        const allUsersRes = await axios.get(`${API_BASE}/api/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const thisUser = followRes.data.find(u => u._id === id);
+        const targetUser = allUsersRes.data.find((u) => u._id === id);
+
         const status = (() => {
-          if (thisUser._id === profileRes.data.user._id) return "self";
-          if (thisUser.followers?.includes(profileRes.data.user._id)) return "following";
-          if (thisUser.pendingRequests?.includes(profileRes.data.user._id)) return "requested";
-          if (thisUser.following?.includes(profileRes.data.user._id)) return "follow_back";
+          if (targetUser._id === myUser._id) return "self";
+          if (targetUser.followers?.includes(myUser._id)) return "following";
+          if (targetUser.pendingRequests?.includes(myUser._id)) return "requested";
+          if (targetUser.following?.includes(myUser._id)) return "follow_back";
           return "not_following";
         })();
+
         setFollowStatus(status);
       } catch (err) {
+        console.error(err);
         setError(err.response?.data?.msg || "Error loading user");
       }
     };
@@ -71,16 +72,28 @@ const UserProfile = () => {
 
   const toggleLike = async (postId) => {
     try {
-      await axios.post(`${API_BASE}/api/posts/${postId}/like`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setLikes(prev => ({ ...prev, [postId]: !prev[postId] }));
-      const res = await axios.get(`${API_BASE}/api/user/${id}/posts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPosts(res.data.posts || []);
+      const isLiked = likes[postId];
+
+      if (isLiked) {
+        await axios.delete(`${API_BASE}/api/posts/${postId}/unlike`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        await axios.post(`${API_BASE}/api/posts/${postId}/like`, {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      setLikes((prev) => ({ ...prev, [postId]: !prev[postId] }));
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? { ...post, likeCount: post.likeCount + (isLiked ? -1 : 1) }
+            : post
+        )
+      );
     } catch (err) {
-      console.error("Error liking post", err);
+      console.error("Error updating like/unlike:", err);
     }
   };
 
@@ -91,7 +104,7 @@ const UserProfile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFollowStatus("requested");
-      } else if (followStatus === "following") {
+      } else if (followStatus === "requested" || followStatus === "following") {
         await axios.delete(`${API_BASE}/api/unfollow/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -130,9 +143,13 @@ const UserProfile = () => {
           <p><strong>Email:</strong> {user.email}</p>
           {followStatus !== "self" && (
             <button
-              className={`btn btn-sm ${followStatus === "following" ? "btn-outline-danger" : "btn-outline-primary"} mt-2`}
+              className={`btn btn-sm mt-2 ${followStatus === "following"
+                ? "btn-outline-danger"
+                : followStatus === "requested"
+                ? "btn-outline-secondary"
+                : "btn-outline-primary"
+              }`}
               onClick={handleFollowToggle}
-              disabled={followStatus === "requested"}
             >
               {followLabel}
             </button>
@@ -173,12 +190,12 @@ const UserProfile = () => {
               </div>
               <div className="card-footer d-flex justify-content-between align-items-center">
                 <button
-                  className={`btn btn-sm ${likes[post._id] ? "btn-danger" : "btn-outline-danger"}`}
+                  className={`btn btn-sm ${likes[post._id] ? "btn-outline-danger" : "btn-outline-primary"}`}
                   onClick={() => toggleLike(post._id)}
                 >
-                  ❤️ {post.likeCount}
+                  {likes[post._id] ? "👎 Unlike" : "👍 Like"}
                 </button>
-                <small className="text-muted">{new Date(post.createdAt).toLocaleString()}</small>
+                <span>{post.likeCount || 0} likes</span>
               </div>
             </div>
           ))}

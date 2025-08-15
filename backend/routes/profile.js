@@ -1,62 +1,92 @@
-const express = require('express');
-const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const auth = require('../middleware/auth');
-const User = require('../models/User');
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const multer = require("multer");
+const path = require("path");
+const auth = require("../middleware/auth");
+const User = require("../models/User");
 
-// Multer setup for file uploads
+const router = express.Router();
+
+// Multer setup for profile picture upload
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    console.log("Saving to /uploads/");
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + file.originalname;
-    console.log("Storing file as:", uniqueName);
-    cb(null, uniqueName);
-  }
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, `${Date.now()}-${file.originalname}`)
 });
 const upload = multer({ storage });
 
-// Update profile route
-// Route
+// ✅ GET /api/profile (fetch current user data)
+router.get("/profile", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    res.json({ user });
+  } catch (err) {
+    console.error("Fetch profile error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// ✅ PUT /api/profile/update
 router.put(
-  '/profile/update',
+  "/profile/update",
   auth,
-  upload.single('photo'),
+  upload.single("photo"),
   async (req, res) => {
     try {
-      const { name, email, oldPassword, password } = req.body;
+
       const user = await User.findById(req.user.id);
+      if (!user) return res.status(404).json({ msg: "User not found" });
 
-      if (!user) return res.status(404).json({ msg: 'User not found' });
 
-      user.name = name || user.name;
-      user.email = email || user.email;
+      const { name, email, about, oldPassword, password } = req.body;
 
-      // Password change
-      if (oldPassword && password) {
-        const isMatch = await user.comparePassword(oldPassword);
-        if (!isMatch) {
-          return res.status(400).json({ msg: 'Old password is incorrect' });
-        }
-        user.password = password;
+      if (name) user.name = name;
+      if (email) user.email = email;
+      if (about && ["job_seeker", "hiring"].includes(about)) {
+        user.about = about;
       }
 
-      // Photo save
+      // ✅ Handle profile picture update
       if (req.file) {
-        user.photo = req.file.filename;
+        user.profilePic = req.file.filename;
+      }
+
+      // ✅ Handle password update securely
+      if (password) {
+        if (!oldPassword) {
+          return res
+            .status(400)
+            .json({ msg: "Old password is required to set a new password" });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ msg: "Incorrect old password" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
       }
 
       await user.save();
-      res.json({ msg: 'Profile updated successfully' });
+
+      res.json({
+        msg: "Profile updated successfully",
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          about: user.about,
+          profilePic: user.profilePic,
+        },
+      });
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ msg: 'Server error' });
+      console.error("Update profile error:", err);
+      res.status(500).json({ msg: "Server error" });
     }
   }
 );
-
 
 module.exports = router;

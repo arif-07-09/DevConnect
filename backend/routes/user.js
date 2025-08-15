@@ -114,11 +114,31 @@ router.get("/user/:id", auth, async (req, res) => {
 });
 
 // Get posts for user
+// routes/user.js (or wherever your /user/:id/posts route is defined)
 router.get("/user/:id/posts", auth, async (req, res) => {
   try {
-    const posts = await Post.find({ author: req.params.id }).sort({ createdAt: -1 });
-    res.json({ posts });
-  } catch (error) {
+    const posts = await Post.find({ author: req.params.id })
+      .sort({ createdAt: -1 })
+      .populate("author", "name profilePic");
+
+    const postsWithLikeInfo = await Promise.all(
+      posts.map(async (post) => {
+        const likeCount = await Like.countDocuments({ post: post._id });
+        const likedByUser = await Like.exists({
+          post: post._id,
+          user: req.user.id,
+        });
+
+        return {
+          ...post.toObject(),
+          likeCount,
+          likedByUser: !!likedByUser,
+        };
+      })
+    );
+
+    res.json({ posts: postsWithLikeInfo });
+  } catch (err) {
     res.status(500).json({ msg: "Server error" });
   }
 });
@@ -171,41 +191,42 @@ router.get("/profile", auth, async (req, res) => {
 });
 
 // Route: Update user profile
-router.put("/profile/update", auth, upload.single("photo"), async (req, res) => {
-  try {
-    const { name, email, oldPassword, password } = req.body;
-    const user = await User.findById(req.user.id);
+// router.put("/profile/update", auth, upload.single("photo"), async (req, res) => {
+//   try {
+//     const { name, email, oldPassword, password } = req.body;
+//     const user = await User.findById(req.user.id);
 
-    if (!user) return res.status(404).json({ msg: "User not found" });
+//     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // Update basic fields
-    user.name = name || user.name;
-    user.email = email || user.email;
+//     // Update basic fields
+//     user.name = name || user.name;
+//     user.email = email || user.email;
 
-    // Check and update password if needed
-    if (oldPassword && password) {
-      const isMatch = await user.comparePassword(oldPassword);
-      if (!isMatch) {
-        return res.status(400).json({ msg: "Old password is incorrect" });
-      }
-      user.password = password;
-    }
+//     // Check and update password if needed
+//     if (oldPassword && password) {
+//       const isMatch = await bcrypt.compare(oldPassword, user.password);
 
-    // Save uploaded photo
-    if (req.file) {
-      user.profilePic = req.file.filename;
-    }
+//       if (!isMatch) {
+//         return res.status(400).json({ msg: "Old password is incorrect" });
+//       }
+//       user.password = password;
+//     }
 
-    await user.save();
+//     // Save uploaded photo
+//     if (req.file) {
+//       user.profilePic = req.file.filename;
+//     }
 
-    // Return updated user (without password)
-    const updatedUser = await User.findById(req.user.id).select("-password");
+//     await user.save();
 
-    res.json({ msg: "Profile updated successfully", user: updatedUser });
-  } catch (err) {
-    console.error("Update profile error:", err);
-    res.status(500).json({ msg: "Server error" });
-  }
-});
+//     // Return updated user (without password)
+//     const updatedUser = await User.findById(req.user.id).select("-password");
+
+//     res.json({ msg: "Profile updated successfully", user: updatedUser });
+//   } catch (err) {
+//     console.error("Update profile error:", err);
+//     res.status(500).json({ msg: "Server error" });
+//   }
+// });
 
 module.exports = router;

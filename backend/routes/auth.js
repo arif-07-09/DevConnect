@@ -32,7 +32,7 @@ router.put("/profile", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
-  }
+  }      
 });
 
 
@@ -63,21 +63,27 @@ router.get("/profile", authMiddleware, async (req, res) => {
 router.put("/change-password", authMiddleware, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
+  // Validate inputs
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ msg: "Both current and new passwords are required" });
+  }
+
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) return res.status(400).json({ msg: "Current password is incorrect" });
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Current password is incorrect" });
+    }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
+
     res.json({ msg: "Password updated successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+    console.error("Change password error:", err);
+    res.status(500).json({ msg: "Server error" });
   }
 });
 

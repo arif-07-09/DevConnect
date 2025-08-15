@@ -8,7 +8,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  const API = 'http://localhost:5000';
+  const API = process.env.REACT_APP_API_BASE;
 
   useEffect(() => {
     if (!token) return navigate('/login');

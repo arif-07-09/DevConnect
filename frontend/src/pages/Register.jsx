@@ -1,4 +1,3 @@
-// src/pages/Register.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +8,7 @@ const Register = () => {
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const API = process.env.REACT_APP_API_BASE;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -32,11 +32,11 @@ const Register = () => {
         formData.append('profilePic', profilePic);
       }
 
-      await axios.post('http://localhost:5000/api/register', formData, {
+      await axios.post(`${API}/api/register`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      const loginRes = await axios.post('http://localhost:5000/api/login', {
+      const loginRes = await axios.post(`${API}/api/login`, {
         email: form.email,
         password: form.password,
       });

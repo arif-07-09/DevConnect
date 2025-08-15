@@ -9,7 +9,9 @@ require("dotenv").config();
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 const postRoutes = require('./routes/post');
+const profileRoutes =require('./routes/profile')
 const notificationRoutes = require('./routes/notifications');
+const jobRoutes = require('./routes/jobRoutes');
 
 const app = express();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // ✅ serve images
@@ -18,7 +20,7 @@ app.use(cors());
 app.use(express.json());           // Parse JSON requests
 app.use(express.urlencoded({ extended: true })); // Parse form data
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use("/api",profileRoutes)
 // ✅ Route Registration
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);
@@ -29,6 +31,7 @@ app.get("/", (req, res) => {
   res.send("API is working!");
 });
 
+app.use('/api/jobs', jobRoutes);
 const followRoutes = require('./routes/follow');
 app.use('/api', followRoutes);
 

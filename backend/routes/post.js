@@ -65,6 +65,8 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+
+
 // Delete a post and its likes
 router.delete('/:postId', auth, async (req, res) => {
   try {
